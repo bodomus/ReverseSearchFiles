@@ -26,6 +26,11 @@ total_size_original_files = {}
 total_size_dublicate_files = 0
 
 
+def compare2Directories(source, destination):
+    """Проверить 2 директории. Если в source есть файлы которых нет в директории destination
+    вывести эти фыайлы в первом столбце. Если во втором столбце есть файлы которых нет в первом столбце
+    вывести эти файлы во втором столбце"""
+
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
@@ -110,6 +115,7 @@ def check_file(fullfilepath):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print_hi('PyCharm')
+    d = fileutils.create_dict(fileDir=r"d:/Work/CodeBooks/")
     # glob.glob('*.mp4')
 
     i = 0
