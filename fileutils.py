@@ -61,33 +61,32 @@ def get_hash(filename):
     md5 = hashlib.md5()
     sha1 = hashlib.sha1()
 
-    with open(filename, 'rb') as f:
-        while True:
-            data = f.read(BUF_SIZE)
-            if not data:
-                return 0
-            md5.update(data)
-            sha1.update(data)
-
-    print("MD5: {0}".format(md5.hexdigest()))
-    print("SHA1: {0}".format(sha1.hexdigest()))
+    file_hash = hashlib.sha256()  # Create the hash object, can use something other than `.sha256()` if you wish
+    with open(filename, 'rb') as f:  # Open the file to read it's bytes
+        fb = f.read(BUF_SIZE)  # Read from the file. Take in the amount declared above
+        while len(fb) > 0:  # While there is still data being read from the file
+            file_hash.update(fb)  # Update the hash
+            fb = f.read(BUF_SIZE)  # Read the next block from the file
     return md5.hexdigest()
 
 
-def create_dict(fileDir):
-    """Создаем dict из директории. key нименование файла
+def create_dict(fileDir, ):
+    """Создаем dict из директории. key нименование файла или путь надо создавать параметр
      value dict с объектом
      filename: full path with name
      size: size of file in bytes
      hash: hashfile
      полный путь ?"""
+    # TODO Add param for using key in dictionary
     dir = {}
     file_item = {}
     for root, dirs, files in os.walk(fileDir):
         for file in files:
-            statinfo = os.stat(file)
+            ff = os.path.join(root, file)
+            statinfo = os.stat(ff)
             file_item['file_size'] = statinfo.st_size
-            file_item['file_name'] = os.path.join(root, file)
+            file_item['file_name'] = file
+            file_item['file_path'] = root
             file_item['file_hash'] = get_hash(os.path.join(root, file))
 
             print('file_size: %d' % statinfo.st_size)
@@ -97,24 +96,14 @@ def create_dict(fileDir):
 
             #dir["file"] = file_item
 
-            value = dir.get(path_file)nmjkoplkjiopl;123456tuiu8980
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            value = dir.get(path_file)
             if value is not None:
-                dir.update({key: [f'{path_file}']})
-            else:
-                dir[key].append(f'{path_file}')
+                raise ("Error The same key is found in dictionary")
+            dir.update({os.path.join(root, file): file_item})
 
     return dir
+
+
+
+
+

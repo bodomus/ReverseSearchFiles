@@ -1,8 +1,8 @@
-
 import os
 import re
 
 import fileutils
+from enum import Enum
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -24,6 +24,12 @@ total_dublicat_files = 0
 total_size_original_files = {}
 # Total size dublicate files
 total_size_dublicate_files = 0
+# Key for Search Dictionary
+class Dict_key(Enum):
+    FILE_NAME = 1,
+    FILE_PATH = 2
+
+
 
 
 def compare2Directories(source, destination):
@@ -31,11 +37,10 @@ def compare2Directories(source, destination):
     вывести эти фыайлы в первом столбце. Если во втором столбце есть файлы которых нет в первом столбце
     вывести эти файлы во втором столбце"""
 
+
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
 
 
 def write_strings(filename, dict):
@@ -44,7 +49,7 @@ def write_strings(filename, dict):
     file_object = open(filename, 'a+')
     file_object.write(f'total count original files: {total_original_files} \n')
     file_object.write(f'total count duplicate files: {total_dublicat_files} \n')
-    sumlambda = lambda item, total : item + total
+    sumlambda = lambda item, total: item + total
     sum = 0
     for i in total_size_original_files.values():
         sum += i
@@ -112,6 +117,27 @@ def check_file(fullfilepath):
                 total_dublicat_files += 1
 
 
+def prepare_files(base_dir1, base_dir2):
+    """ Сравниваем файлы из base_dir1 с base_dir2
+    файл равен если хеш сумма одинакова или наименование и размер одинаков
+    """
+    if '' == base_dir1 or base_dir2 == '':
+        raise ("Error base_dir1 or base_dir2 is empty")
+    sdict = {}
+    ddict = {}
+
+    sdict = fileutils.create_dict(fileDir=base_dir1)
+    ddict = fileutils.create_dict(fileDir=base_dir2)
+
+    for obj in sdict.keys():
+        value = sdict.get(obj)
+        if value is not None:
+            for v in value:
+                spath = v['file_path']
+                ddict.get(spath)
+
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print_hi('PyCharm')
@@ -130,7 +156,7 @@ if __name__ == '__main__':
                 if result != None:
                     size = os.path.getsize(path_file)
                     filesize += size
-                    #shutil.move(path_file, 'j:/' + 'VideoFromProjects/'+file)
+                    # shutil.move(path_file, 'j:/' + 'VideoFromProjects/'+file)
                     # list.append(f'filename: {path_file}: {size}\n')
                     check_file(path_file)
 
