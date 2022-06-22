@@ -70,14 +70,21 @@ def get_hash(filename):
     return md5.hexdigest()
 
 
-def create_dict(fileDir, ):
+def create_dict(fileDir, dict_key):
     """Создаем dict из директории. key нименование файла или путь надо создавать параметр
      value dict с объектом
      filename: full path with name
      size: size of file in bytes
      hash: hashfile
-     полный путь ?"""
+     :Date: 2002-03-22
+     :Version: 1
+     :Authors:
+        - Me
+        - Myself
+        - I
+    полный путь ?"""
     # TODO Add param for using key in dictionary
+    global Dict_key
     dir = {}
     file_item = {}
     for root, dirs, files in os.walk(fileDir):
@@ -96,7 +103,8 @@ def create_dict(fileDir, ):
 
             #dir["file"] = file_item
 
-            value = dir.get(path_file)
+            kkey = dict_key == Dict_key.FILE_NAME
+            value = dir.get(file if dict_key == Dict_key.FILE_NAME else path_file)
             if value is not None:
                 raise ("Error The same key is found in dictionary")
             dir.update({os.path.join(root, file): file_item})

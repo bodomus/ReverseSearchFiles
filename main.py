@@ -24,12 +24,12 @@ total_dublicat_files = 0
 total_size_original_files = {}
 # Total size dublicate files
 total_size_dublicate_files = 0
+
+
 # Key for Search Dictionary
 class Dict_key(Enum):
     FILE_NAME = 1,
     FILE_PATH = 2
-
-
 
 
 def compare2Directories(source, destination):
@@ -117,9 +117,11 @@ def check_file(fullfilepath):
                 total_dublicat_files += 1
 
 
-def prepare_files(base_dir1, base_dir2):
+def prepare_files(base_dir1, base_dir2, dict_key):
     """ Сравниваем файлы из base_dir1 с base_dir2
     файл равен если хеш сумма одинакова или наименование и размер одинаков
+    Extend `base_dir1`.  Class attribute `instances` keeps track
+    of the number of `Keeper` objects instantiated.
     """
     if '' == base_dir1 or base_dir2 == '':
         raise ("Error base_dir1 or base_dir2 is empty")
@@ -133,15 +135,15 @@ def prepare_files(base_dir1, base_dir2):
         value = sdict.get(obj)
         if value is not None:
             for v in value:
-                spath = v['file_path']
-                ddict.get(spath)
-
+                key = v['file_path'] if dict_key == Dict_key.FILE_PATH else v['file_name']
+                ddict.get(key)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print_hi('PyCharm')
-    d = fileutils.create_dict(fileDir=r"d:/Work/CodeBooks/")
+    prepare_files(r"d:/Work/CodeBooks/", r"d:/Work/CodeBooks1/")
+    fileutils.create_dict(fileDir=r"d:/Work/CodeBooks/")
     # glob.glob('*.mp4')
 
     i = 0
