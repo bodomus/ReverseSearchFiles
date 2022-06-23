@@ -28,7 +28,9 @@ total_size_dublicate_files = 0
 
 # Key for Search Dictionary
 class Dict_key(Enum):
+    #Search by file name
     FILE_NAME = 1,
+    #Search by file path
     FILE_PATH = 2
 
 
@@ -128,21 +130,60 @@ def prepare_files(base_dir1, base_dir2, dict_key):
     sdict = {}
     ddict = {}
 
-    sdict = fileutils.create_dict(fileDir=base_dir1)
-    ddict = fileutils.create_dict(fileDir=base_dir2)
+    sdict = fileutils.create_dict(fileDir=base_dir1, dict_key=Dict_key.FILE_NAME)
+    ddict = fileutils.create_dict(fileDir=base_dir2, dict_key=Dict_key.FILE_NAME)
 
-    for obj in sdict.keys():
-        value = sdict.get(obj)
-        if value is not None:
-            for v in value:
-                key = v['file_path'] if dict_key == Dict_key.FILE_PATH else v['file_name']
-                ddict.get(key)
+    for skey in sdict.keys():
+        svalue = sdict.get(skey)
+        if svalue is not None:
+            dkey = svalue['file_path'] if dict_key == Dict_key.FILE_PATH else svalue['file_name']
+            dvalue = ddict.get(dkey)
+            if dvalue is not None:
+                result_compare = compare_2files(svalue["file_path"], dvalue["file_path"])
+                print_compare_result(svalue["file_path"], dvalue["file_path"], result_compare)
+
+
+def print_compare_result(file1: object, file2: object, operation_result: bool) -> None:
+    s1 = "файлы равны" if operation_result else "файлы не равны"
+    print(f"{s1} \t Исходный файл \t Сравиваемый файл\n")
+    print(f"Полный путь:{file1['file_path']} {file2['file_path']}  \n ")
+    print(f"Имя файла:{file1['file_name']} {file2['file_name']}  \n ")
+    print(f"Размер файла:{file1['file_size']} {file2['file_size']}  \n ")
+    print(f"hash sum:{file1['file_hash']} {file2['file_hash']} ", end=f"\n{'-' * 80}\n")
+
+
+def compare_2files(file1: object, file2: object) -> bool:
+    """
+    filename: file name
+    filepath: full path with name
+    size: size of file in bytes
+    hash: hashfile
+    сравниваем файлы Условия сравнения на равенство имена файлов равны, размер одинаков и хэш суммы совпадают
+    :param file1: #dict с объектом
+    :param file2: #dict с объектом
+    :return: bool
+    :Date: 2022-06-23
+    :Version: 1
+    :Authors:
+        bodomus@gmail.com
+    """
+    result = False
+    if file1 is None or file2 is None:
+        raise ("compare_2files: the input param is None")
+    if(file1['file_name'] == file2['file_name']) and (file1['file_hash'] == file2['file_hash']) and (file1['file_size'] == file2['file_size']):
+        result = True
+    if result:
+        print_compare_result(file1=file1, file2=file2, operation_result=True)
+    else:
+        print_compare_result(file1=file1, file2=file2, operation_result=False)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    #TODO split code on parts. And call them by arg from command string
+
     print_hi('PyCharm')
-    prepare_files(r"d:/Work/CodeBooks/", r"d:/Work/CodeBooks1/")
+    prepare_files(r"d:/Work/CodeBooks/", r"d:/Work/CodeBooks1/", dict_key=Dict_key.FILE_NAME)
     fileutils.create_dict(fileDir=r"d:/Work/CodeBooks/")
     # glob.glob('*.mp4')
 

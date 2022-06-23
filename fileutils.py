@@ -6,7 +6,6 @@ import hashlib
 # BUF_SIZE is totally arbitrary, change for your app!
 BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
 
-
 def get_file_size_in_bytes(file_path):
     """ Get size of file at given path in bytes"""
     size = os.path.getsize(file_path)
@@ -70,12 +69,14 @@ def get_hash(filename):
     return md5.hexdigest()
 
 
-def create_dict(fileDir, dict_key):
+def create_dict(fileDir: object, dict_key: enumerate) -> dict:
     """Создаем dict из директории. key нименование файла или путь надо создавать параметр
      value dict с объектом
-     filename: full path with name
+     filename: file name
+     file_path: full path with name
      size: size of file in bytes
      hash: hashfile
+     :rtype: object
      :Date: 2002-03-22
      :Version: 1
      :Authors:
