@@ -8,8 +8,6 @@ BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
 
 
 # Key for Search Dictionary
-
-
 class Dict_key(Enum):
     # Search by file name
     FILE_NAME = 1,
@@ -94,7 +92,7 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
         - Me
         - Myself
         - I
-    полный путь ?"""
+     полный путь ?"""
     # TODO Add param for using key in dictionary
     global Dict_key
     dir = {}
@@ -112,8 +110,6 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
             path_file = os.path.join(root, file)
             size = os.path.getsize(path_file)
             name = os.path.basename(path_file)
-
-            #dir["file"] = file_item
 
             kkey = dict_key == Dict_key.FILE_NAME
             value = dir.get(file if dict_key == Dict_key.FILE_NAME else path_file)
