@@ -1,10 +1,21 @@
 import os
-import enum
+from enum import Enum, unique
 from pathlib import Path
 import hashlib
 
 # BUF_SIZE is totally arbitrary, change for your app!
 BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
+
+
+# Key for Search Dictionary
+
+
+class Dict_key(Enum):
+    # Search by file name
+    FILE_NAME = 1,
+    # Search by file path
+    FILE_PATH = 2
+
 
 def get_file_size_in_bytes(file_path):
     """ Get size of file at given path in bytes"""
@@ -31,7 +42,7 @@ def get_file_size_in_bytes_3(file_path):
 
 
 # Enum for size units
-class SIZE_UNIT(enum.Enum):
+class SIZE_UNIT(Enum):
     BYTES = 1
     KB = 2
     MB = 3

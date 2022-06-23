@@ -2,7 +2,7 @@ import os
 import re
 
 import fileutils
-from enum import Enum
+from enum import Enum, unique
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -24,14 +24,6 @@ total_dublicat_files = 0
 total_size_original_files = {}
 # Total size dublicate files
 total_size_dublicate_files = 0
-
-
-# Key for Search Dictionary
-class Dict_key(Enum):
-    #Search by file name
-    FILE_NAME = 1,
-    #Search by file path
-    FILE_PATH = 2
 
 
 def compare2Directories(source, destination):
@@ -130,13 +122,13 @@ def prepare_files(base_dir1, base_dir2, dict_key):
     sdict = {}
     ddict = {}
 
-    sdict = fileutils.create_dict(fileDir=base_dir1, dict_key=Dict_key.FILE_NAME)
-    ddict = fileutils.create_dict(fileDir=base_dir2, dict_key=Dict_key.FILE_NAME)
+    sdict = fileutils.create_dict(fileDir=base_dir1, dict_key=fileutils.Dict_key.FILE_NAME)
+    ddict = fileutils.create_dict(fileDir=base_dir2, dict_key=fileutils.Dict_key.FILE_NAME)
 
     for skey in sdict.keys():
         svalue = sdict.get(skey)
         if svalue is not None:
-            dkey = svalue['file_path'] if dict_key == Dict_key.FILE_PATH else svalue['file_name']
+            dkey = svalue['file_path'] if dict_key == fileutils.Dict_key.FILE_PATH else svalue['file_name']
             dvalue = ddict.get(dkey)
             if dvalue is not None:
                 result_compare = compare_2files(svalue["file_path"], dvalue["file_path"])
@@ -183,7 +175,7 @@ if __name__ == '__main__':
     #TODO split code on parts. And call them by arg from command string
 
     print_hi('PyCharm')
-    prepare_files(r"d:/Work/CodeBooks/", r"d:/Work/CodeBooks1/", dict_key=Dict_key.FILE_NAME)
+    prepare_files(r"d:/Work/CodeBooks/", r"d:/Work/CodeBooks1/", dict_key=fileutils.Dict_key.FILE_NAME)
     fileutils.create_dict(fileDir=r"d:/Work/CodeBooks/")
     # glob.glob('*.mp4')
 
