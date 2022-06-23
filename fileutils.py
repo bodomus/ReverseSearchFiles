@@ -111,11 +111,11 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
             size = os.path.getsize(path_file)
             name = os.path.basename(path_file)
 
-            kkey = dict_key == Dict_key.FILE_NAME
-            value = dir.get(file if dict_key == Dict_key.FILE_NAME else path_file)
+            kkey = file if dict_key == Dict_key.FILE_NAME else path_file
+            value = dir.get(kkey)
             if value is not None:
                 raise ("Error The same key is found in dictionary")
-            dir.update({os.path.join(root, file): file_item})
+            dir.update({kkey: file_item})
 
     return dir
 
