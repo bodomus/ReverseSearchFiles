@@ -116,8 +116,9 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
             kkey = file if dict_key == Dict_key.FILE_NAME else ff
             value = dir.get(kkey)
             if value is not None:
-                raise ("Error The same key %s is found in dictionary".format(kkey))
-            dir.update({ff: file_item})
+                exception_message = "Error The same key %s is found in dictionary" % kkey
+                raise ValueError(exception_message)
+            dir.update({kkey: file_item})
 
     print ("Количество элементов в источнике: %d " % len(dir))
     return dir
