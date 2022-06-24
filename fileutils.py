@@ -108,7 +108,7 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
             file_item['file_path'] = root
             file_item['file_hash'] = hash
             index += 1
-            print('%d.\t file_name: %s \tfile_size: %d \tfile_hash %s ' % (index, file, statinfo.st_size, hash))
+            print(f'{index:d}.\t file_name: {file} \tfile_size: {statinfo.st_size:d} \tfile_hash {hash} ')
 
             size = os.path.getsize(ff)
             name = os.path.basename(ff)
@@ -116,11 +116,11 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
             kkey = file if dict_key == Dict_key.FILE_NAME else ff
             value = dir.get(kkey)
             if value is not None:
-                exception_message = "Error The same key %s is found in dictionary" % kkey
+                exception_message = "Error the same key %s is found in dictionary" % kkey
                 raise ValueError(exception_message)
             dir.update({kkey: file_item})
 
-    print ("Количество элементов в источнике: %d " % len(dir))
+    print("\n\nКоличество элементов в источнике: %d\n\n " % len(dir))
     return dir
 
 

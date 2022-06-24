@@ -131,17 +131,17 @@ def prepare_files(base_dir1, base_dir2, dict_key):
             dkey = svalue['file_path'] if dict_key == fileutils.Dict_key.FILE_PATH else svalue['file_name']
             dvalue = ddict.get(dkey)
             if dvalue is not None:
-                result_compare = compare_2files(svalue["file_path"], dvalue["file_path"])
-                print_compare_result(svalue["file_path"], dvalue["file_path"], result_compare)
+                result_compare = compare_2files(svalue, dvalue)
+                #print_compare_result(svalue["file_path"], dvalue["file_path"], result_compare)
 
 
 def print_compare_result(file1: object, file2: object, operation_result: bool) -> None:
     s1 = "файлы равны" if operation_result else "файлы не равны"
-    print(f"{s1} \t Исходный файл \t Сравиваемый файл\n")
+    print(f"{s1} \t Исходный файл \t Сравниваемый файл\n")
     print(f"Полный путь:{file1['file_path']} {file2['file_path']}  \n ")
     print(f"Имя файла:{file1['file_name']} {file2['file_name']}  \n ")
     print(f"Размер файла:{file1['file_size']} {file2['file_size']}  \n ")
-    print(f"hash sum:{file1['file_hash']} {file2['file_hash']} ", end=f"\n{'-' * 80}\n")
+    print(f"hash sum:{file1['file_hash']} {file2['file_hash']} ", end=f"\n{'-' * 80}\n\n\n")
 
 
 def compare_2files(file1: object, file2: object) -> bool:
