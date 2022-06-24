@@ -8,6 +8,8 @@ BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
 
 
 # Key for Search Dictionary
+
+
 class Dict_key(Enum):
     # Search by file name
     FILE_NAME = 1,
@@ -66,16 +68,14 @@ def get_file_size(file_name, size_type=SIZE_UNIT.BYTES):
 
 
 def get_hash(filename):
-    md5 = hashlib.md5()
     sha1 = hashlib.sha1()
 
-    file_hash = hashlib.sha256()  # Create the hash object, can use something other than `.sha256()` if you wish
     with open(filename, 'rb') as f:  # Open the file to read it's bytes
         fb = f.read(BUF_SIZE)  # Read from the file. Take in the amount declared above
         while len(fb) > 0:  # While there is still data being read from the file
-            file_hash.update(fb)  # Update the hash
+            sha1.update(fb)  # Update the hash
             fb = f.read(BUF_SIZE)  # Read the next block from the file
-    return md5.hexdigest()
+    return sha1.hexdigest()
 
 
 def create_dict(fileDir: object, dict_key: enumerate) -> dict:
@@ -92,31 +92,35 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
         - Me
         - Myself
         - I
-     полный путь ?"""
+    полный путь ?"""
     # TODO Add param for using key in dictionary
     global Dict_key
     dir = {}
     file_item = {}
+    index = 0;
     for root, dirs, files in os.walk(fileDir):
         for file in files:
             ff = os.path.join(root, file)
             statinfo = os.stat(ff)
+            hash = get_hash(ff)
             file_item['file_size'] = statinfo.st_size
             file_item['file_name'] = file
             file_item['file_path'] = root
-            file_item['file_hash'] = get_hash(os.path.join(root, file))
+            file_item['file_hash'] = hash
+            index += 1
+            print(f'{index:d}.\t file_name: {file} \tfile_size: {statinfo.st_size:d} \tfile_hash {hash} ')
 
-            print('file_size: %d' % statinfo.st_size)
-            path_file = os.path.join(root, file)
-            size = os.path.getsize(path_file)
-            name = os.path.basename(path_file)
+            size = os.path.getsize(ff)
+            name = os.path.basename(ff)
 
-            kkey = file if dict_key == Dict_key.FILE_NAME else path_file
+            kkey = file if dict_key == Dict_key.FILE_NAME else ff
             value = dir.get(kkey)
             if value is not None:
-                raise ("Error The same key is found in dictionary")
+                exception_message = "Error the same key %s is found in dictionary" % kkey
+                raise ValueError(exception_message)
             dir.update({kkey: file_item})
 
+    print("\n\nКоличество элементов в источнике: %d\n\n " % len(dir))
     return dir
 
 
