@@ -6,10 +6,18 @@ import hashlib
 # BUF_SIZE is totally arbitrary, change for your app!
 BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 # Key for Search Dictionary
-
-
 class Dict_key(Enum):
     # Search by file name
     FILE_NAME = 1,
@@ -96,19 +104,20 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
     # TODO Add param for using key in dictionary
     global Dict_key
     dir = {}
-    file_item = {}
+
     index = 0;
     for root, dirs, files in os.walk(fileDir):
         for file in files:
+            file_item = {}
             ff = os.path.join(root, file)
             statinfo = os.stat(ff)
             hash = get_hash(ff)
             file_item['file_size'] = statinfo.st_size
             file_item['file_name'] = file
-            file_item['file_path'] = root
+            file_item['file_path'] = ff
             file_item['file_hash'] = hash
             index += 1
-            print(f'{index:d}.\t file_name: {file} \tfile_size: {statinfo.st_size:d} \tfile_hash {hash} ')
+            print(f'{bcolors.OKBLUE}{index:d}.{bcolors.ENDC}\t {bcolors.OKBLUE}file_name:{bcolors.ENDC} {file} \t{bcolors.OKBLUE}file_size:{bcolors.ENDC} {statinfo.st_size:d} \t{bcolors.OKBLUE}file_hash:{bcolors.ENDC} {hash} ')
 
             size = os.path.getsize(ff)
             name = os.path.basename(ff)
@@ -116,11 +125,11 @@ def create_dict(fileDir: object, dict_key: enumerate) -> dict:
             kkey = file if dict_key == Dict_key.FILE_NAME else ff
             value = dir.get(kkey)
             if value is not None:
-                exception_message = "Error the same key %s is found in dictionary" % kkey
+                exception_message = f"{bcolors.FAIL}Error the same key %s is found in dictionary{bcolors.ENDC}" % kkey
                 raise ValueError(exception_message)
             dir.update({kkey: file_item})
 
-    print("\n\nКоличество элементов в источнике: %d\n\n " % len(dir))
+    print("\nКоличество элементов в источнике: %d\n " % len(dir))
     return dir
 
 
