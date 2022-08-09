@@ -1,5 +1,7 @@
 import os
+import sys
 import fileutils
+import re
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -23,8 +25,14 @@ total_size_original_files = {}
 total_size_dublicate_files = 0
 # counter
 count = 0
+# kyes that apperas in command line arguments
+preferences_keys = dict({'sdir': f'-sdir=', 'ddir': f'-ddir=', 'ks': f'-ks=', 'c': '-c'})  # [file] [path]
 
-#class for console color text
+# object for params command line
+params = {'sdir': None, 'ddir': None, 'key': None, "search_type": None}
+
+
+# class for console color text
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -35,6 +43,7 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 def compare2Directories(source, destination):
     """Проверить 2 директории. Если в source есть файлы которых нет в директории destination
@@ -134,9 +143,14 @@ def prepare_files(base_dir1, base_dir2, dict_key):
     sdict = {}
     ddict = {}
 
-    sdict = fileutils.create_dict(fileDir=base_dir1, dict_key=fileutils.Dict_key.FILE_NAME)
-    ddict = fileutils.create_dict(fileDir=base_dir2, dict_key=fileutils.Dict_key.FILE_NAME)
+    sdict = fileutils.create_dict(base_dir1, fileutils.Dict_key.FILE_NAME)
+    ddict = fileutils.create_dict(base_dir2, fileutils.Dict_key.FILE_NAME)
 
+    compare_directory(ddict, dict_key, sdict)
+
+
+def compare_directory(ddict, dict_key, sdict):
+    global count
     for skey in sdict.keys():
         svalue = sdict.get(skey)
         if svalue is not None:
@@ -148,6 +162,7 @@ def prepare_files(base_dir1, base_dir2, dict_key):
                 print_compare_result(count, svalue, dvalue, compare_result)
             else:
                 print_not_found_result(count, file1=svalue)
+
 
 def print_not_found_result(count, file1: object):
     s1 = f"{count}.файл не найден "
@@ -180,37 +195,147 @@ def compare_2files(count, file1: object, file2: object) -> bool:
     result = False
     if file1 is None or file2 is None:
         raise ("compare_2files: the input param is None")
-    if(file1['file_name'] == file2['file_name']) and (file1['file_hash'] == file2['file_hash']) and (file1['file_size'] == file2['file_size']):
+    if (file1['file_name'] == file2['file_name']) and (file1['file_hash'] == file2['file_hash']) and (
+            file1['file_size'] == file2['file_size']):
         result = True
     return result
 
 
+def call_is_directory_compare(argslice) -> bool:
+    """
+    Проверить если запущен режим сравнения директорий (1 режим) - то выполнить его
+    :argslice: arguments command line
+    :return:
+    """
+    p1 = get_directory(1, argslice)
+    p2 = get_directory(2, argslice)
+    tk = get_type_key(argslice)
+
+    if p1 is not None and p2 is not None and tk is not None:
+        prepare_files(p1, p2, dict_key=tk)
+        return True
+    return False
+
+
+def call_is_file_name_compare(argslice) -> None:
+    """
+    2 mode
+        Проверить если запущен режим сравнения наименования файла (2 режим) - то выполнить его
+        :argslice: arguments command line
+        :return:
+        """
+    for item in argslice:
+        x = re.search('^-c$', item)
+        if x:
+            i = 0
+            filesize = 0
+            for root, dirs, files in os.walk(pathes):
+                for file in files:
+                    if file.endswith(".mp4") or file.endswith(".jpg") or file.endswith(".cr2"):
+                        path_file = os.path.join(root, file)
+                        result = re.search(r'-\d+', file)
+                        i = i + 1
+                        # print(path_file, i)
+                        if result != None:
+                            size = os.path.getsize(path_file)
+                            filesize += size
+                            # shutil.move(path_file, 'j:/' + 'VideoFromProjects/'+file)
+                            # list.append(f'filename: {path_file}: {size}\n')
+                            check_file(path_file)
+
+            # See PyCharm help at https://www.jetbrains.com/help/pycharm/
+            write_strings(output_filename, filedict)
+
+            print_hi(filesize)
+    return
+
+
+def get_directory(index: int, args: list) -> object:
+    """
+        Получить из комагдной строки директорию. index1 - source directory index2-destination directory
+        :param index: #1 or 2 source or destination directory
+        :param args: command string arguments
+        :return: bool
+        :Date: 2022-06-23
+        :Version: 1
+        :Authors: bodomus@gmail.com
+        """
+    for item in args:
+        x = re.search('^-sdir1=\S*$', item) if index == 1 else re.search('^-ddir2=\S*$', item)
+        if x:
+            return item.replace("-sdir1=" if index == 1 else "-sdir2=", '')
+    return None
+
+
+def get_type_search(args: list) -> object:
+    """
+        Получить из командной строки параметр поиска по файлу или директории
+        :param args: command string arguments
+        :Date: 2022-06-23
+        :Version: 1
+        :Authors: bodomus@gmail.com
+        """
+    for item in args:
+        x = re.search('^-c\S*$', item)
+        if x:
+            return fileutils.Dict_key.FILE_NAME
+    return fileutils.Dict_key.FILE_PATH
+
+
+def get_type_key(argsslice: list) -> object:
+    """
+        Получить из командной строки тип ключа для поиска в dict
+        :param argsslice: arguments command string
+        :return: object
+        :Date: 2022-06-27
+        :Version: 1
+        :Authors: bodomus@gmail.com
+        """
+    for item in argsslice:
+        x = re.search(r"^-sk=file|path$", item)
+
+        if x:
+            param = item.replace('-sk=', '')
+            return fileutils.Dict_key.FILE_NAME if param == 'file' else fileutils.Dict_key.FILE_PATH
+    return None
+
+
+def prepare_command_string(argsslice: list) -> None:
+    source = get_directory(index=1, args=argsslice)
+    destiny = get_directory(index=2, args=argsslice)
+    tk = get_type_key(argsslice)
+    searched_type = get_type_search(argsslice)
+
+    params.update({'sdir': source, 'ddir': destiny, 'key': tk, "search_type": searched_type})
+
+
+def is_params_valid() -> bool:
+    if params["search_type"] == fileutils.Dict_key.FILE_PATH and params["sdir"] is not None and params[
+        'ddir'] is not None:
+        if params["key"] is None:
+            print_help()
+            return False
+    elif params["search_type"] == fileutils.Dict_key.FILE_NAME:
+        return True
+
+
+def print_help():
+    print(f"{bcolors.OKCYAN} Using:\n {bcolors.ENDC}")
+    # -sdir1 = d: / Work / CodeBooks - ddir2 = d: / Work / CodeBooks1
+    print(
+        f"{bcolors.OKCYAN} -sdir1(directory1path) -ddir2(directory2path) search and compare directories(new behaviour)\n {bcolors.ENDC}")
+    print(f"{bcolors.OKCYAN} \ks=file[path] search comparison by file or full file path\n {bcolors.ENDC}")
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    #TODO split code on parts. And call them by arg from command string
+    # TODO split code on parts. And call them by arg from command string
+    args = sys.argv[1:]
 
-    print_hi('PyCharm')
-    print(f"{bcolors.WARNING}Warning: No active frommets remain. Continue?{bcolors.ENDC}")
-    prepare_files(r"d:/Work/CodeBooks/", r"d:/Work/CodeBooks1/", dict_key=fileutils.Dict_key.FILE_NAME)
-    if (1==2):
-        i = 0
-        filesize = 0
-        for root, dirs, files in os.walk(pathes):
-            for file in files:
-                if file.endswith(".mp4") or file.endswith(".jpg") or file.endswith(".cr2"):
-                    path_file = os.path.join(root, file)
-                    result = re.search(r'-\d+', file)
-                    i = i + 1
-                    # print(path_file, i)
-                    if result != None:
-                        size = os.path.getsize(path_file)
-                        filesize += size
-                        # shutil.move(path_file, 'j:/' + 'VideoFromProjects/'+file)
-                        # list.append(f'filename: {path_file}: {size}\n')
-                        check_file(path_file)
+    if len(sys.argv) == 1:
+        print_help()
+        exit()
+    prepare_command_string(args)
 
-        # See PyCharm help at https://www.jetbrains.com/help/pycharm/
-        write_strings(output_filename, filedict)
-
-        print_hi('PyCharm end')
-        print_hi(filesize)
+    call_is_directory_compare(args)
+    call_is_file_name_compare(args)
