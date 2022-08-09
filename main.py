@@ -2,6 +2,7 @@ import os
 import sys
 import fileutils
 import re
+import SearcherFailed
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -26,7 +27,8 @@ total_size_dublicate_files = 0
 # counter
 count = 0
 # kyes that apperas in command line arguments
-preferences_keys = dict({'sdir': f'-sdir=', 'ddir': f'-ddir=', 'ks': f'-ks=', 'c': '-c'})  # [file] [path]
+preferences_keys = dict({'sdir': f'-sdir=', 'ddir': f'-ddir=', 'ks': f'-ks=', 'c': '-c', 'pathes': '-pathes=',
+                         'output_filename': '-output_filename='})  # [file] [path]
 
 # object for params command line
 params = {'sdir': None, 'ddir': None, 'key': None, "search_type": None}
@@ -139,7 +141,7 @@ def prepare_files(base_dir1, base_dir2, dict_key):
     """
     global count
     if '' == base_dir1 or base_dir2 == '':
-        raise ("Error base_dir1 or base_dir2 is empty")
+        raise SearcherFailed("Error base_dir1 or base_dir2 is empty")
     sdict = {}
     ddict = {}
 
@@ -194,7 +196,7 @@ def compare_2files(count, file1: object, file2: object) -> bool:
     """
     result = False
     if file1 is None or file2 is None:
-        raise ("compare_2files: the input param is None")
+        raise SearcherFailed("compare_2files: the input param is None")
     if (file1['file_name'] == file2['file_name']) and (file1['file_hash'] == file2['file_hash']) and (
             file1['file_size'] == file2['file_size']):
         result = True
@@ -267,6 +269,38 @@ def get_directory(index: int, args: list) -> object:
     return None
 
 
+def get_pathes(args: list) -> object:
+    """
+        Получить из командной строки параметр pathes - папка где лежат исходные фото файлв
+        для поиска по типу fileutils.Dict_key.FILE_NAME
+        :param args: command string arguments
+        :Date: 2022-08-09
+        :Version: 1
+        :Authors: bodomus@gmail.com
+        """
+    for item in args:
+        x = re.search('^-pathes=\S*$', item)
+        if x:
+            return item.replace("-pathes=", '')
+    return None
+
+
+def get_output_filename(args: list) -> object:
+    """
+        Получить из командной строки параметр get_output_filename - файл в котором будут выводиться результаты
+        для поиска по типу fileutils.Dict_key.FILE_NAME
+        :param args: command string arguments
+        :Date: 2022-08-09
+        :Version: 1
+        :Authors: bodomus@gmail.com
+        """
+    for item in args:
+        x = re.search('^-output_filename=\S*$', item)
+        if x:
+            return item.replace("-output_filename=", '')
+    return None
+
+
 def get_type_search(args: list) -> object:
     """
         Получить из командной строки параметр поиска по файлу или директории
@@ -301,12 +335,22 @@ def get_type_key(argsslice: list) -> object:
 
 
 def prepare_command_string(argsslice: list) -> None:
+    """
+            Читает переменные из командной строки
+            :param argsslice: arguments command string
+            :return: object
+            :Date: 2022-06-27
+            :Version: 1
+            :Authors: bodomus@gmail.com
+    """
     source = get_directory(index=1, args=argsslice)
     destiny = get_directory(index=2, args=argsslice)
     tk = get_type_key(argsslice)
     searched_type = get_type_search(argsslice)
-
-    params.update({'sdir': source, 'ddir': destiny, 'key': tk, "search_type": searched_type})
+    pathes = get_pathes(argsslice)
+    output_filename = get_output_filename(argsslice)
+    params.update({'sdir': source, 'ddir': destiny, 'key': tk, "search_type": searched_type, pathes: pathes,
+                   output_filename: output_filename})
 
 
 def is_params_valid() -> bool:
@@ -315,8 +359,11 @@ def is_params_valid() -> bool:
         if params["key"] is None:
             print_help()
             return False
-    elif params["search_type"] == fileutils.Dict_key.FILE_NAME:
+    elif params["search_type"] == fileutils.Dict_key.FILE_NAME and params['pathes'] is not None and params[
+        'output_filename'] is not None:
         return True
+    print_help()
+    return False
 
 
 def print_help():
@@ -324,7 +371,10 @@ def print_help():
     # -sdir1 = d: / Work / CodeBooks - ddir2 = d: / Work / CodeBooks1
     print(
         f"{bcolors.OKCYAN} -sdir1(directory1path) -ddir2(directory2path) search and compare directories(new behaviour)\n {bcolors.ENDC}")
-    print(f"{bcolors.OKCYAN} \ks=file[path] search comparison by file or full file path\n {bcolors.ENDC}")
+    print(f"{bcolors.OKCYAN} -ks=file[path] search comparison by file or full file path\n {bcolors.ENDC}")
+    print(f"{bcolors.OKCYAN} -pathes= directory where placed photo files\n {bcolors.ENDC}")
+    print(f"{bcolors.OKCYAN} -c search comparison by file name\n {bcolors.ENDC}")
+    print(f"{bcolors.OKCYAN} -output_filename= file for store output information\n {bcolors.ENDC}")
 
 
 # Press the green button in the gutter to run the script.
@@ -338,4 +388,5 @@ if __name__ == '__main__':
     prepare_command_string(args)
 
     call_is_directory_compare(args)
-    call_is_file_name_compare(args)
+    if params["search_type"] == fileutils.Dict_key.FILE_NAME:
+        call_is_file_name_compare(args)
