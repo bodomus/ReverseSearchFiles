@@ -19,14 +19,14 @@ filedict = {}
 # Total original files
 total_original_files = 0
 # Total dublicat files
-total_dublicat_files = 0
+total_duplicat_files = 0
 # Total size original files
 total_size_original_files = {}
-# Total size dublicate files
-total_size_dublicate_files = 0
+# Total size duplicate files
+total_size_duplicate_files = 0
 # counter
 count = 0
-# kyes that apperas in command line arguments
+# keys that appear in command line arguments
 preferences_keys = dict({'sdir': f'-sdir=', 'ddir': f'-ddir=', 'ks': f'-ks=', 'c': '-c', 'pathes': '-pathes=',
                          'output_filename': '-output_filename='})  # [file] [path]
 
@@ -60,11 +60,11 @@ def print_hi(name):
 
 def write_strings(filename, dict):
     global total_original_files
-    global total_dublicat_files
+    global total_duplicat_files
 
     file_object = open(filename, 'w+')
     file_object.write(f'total count original files: {total_original_files} \n')
-    file_object.write(f'total count duplicate files: {total_dublicat_files} \n')
+    file_object.write(f'total count duplicate files: {total_duplicat_files} \n')
     sumlambda = lambda item, total: item + total
     sum = 0
     for i in total_size_original_files.values():
@@ -72,7 +72,7 @@ def write_strings(filename, dict):
 
     file_object.write(f'total size original files: {sum} [{fileutils.convert_unit(sum, fileutils.SIZE_UNIT.MB)} MB]\n')
     file_object.write(
-        f'total size dublicate files: {total_size_dublicate_files}  [{fileutils.convert_unit(total_size_dublicate_files, fileutils.SIZE_UNIT.MB)}] MB \n\n\n')
+        f'total size dublicate files: {total_size_duplicate_files}  [{fileutils.convert_unit(total_size_duplicate_files, fileutils.SIZE_UNIT.MB)}] MB \n\n\n')
     for obj in dict.keys():
         value = dict.get(obj)
         if value is not None:
@@ -80,7 +80,7 @@ def write_strings(filename, dict):
             for f in value:
                 file_object.write(f'\t {f} \n')
 
-    get_dublicate_files(dict)
+    get_duplicate_files(dict)
     file_object.write(f'++++++++++duplicate+++++++++++  \n')
     for value in dublicate_dict.values():
         if value is not None:
@@ -88,7 +88,7 @@ def write_strings(filename, dict):
     file_object.close()
 
 
-def get_dublicate_files(dict):
+def get_duplicate_files(dict):
     for obj in dict.keys():
         value = dict.get(obj)
         if value is not None:
@@ -99,9 +99,9 @@ def get_dublicate_files(dict):
 def check_file(fullfilepath):
     """ Проверить файл на существование исходного файла без символа "-" с таким же свойствами"""
     global total_size_original_files
-    global total_size_dublicate_files
+    global total_size_duplicate_files
     global total_original_files
-    global total_dublicat_files
+    global total_duplicat_files
 
     sizefileodublicat = os.path.getsize(path_file)
     total_size_dublicate_files += sizefileodublicat
@@ -126,11 +126,11 @@ def check_file(fullfilepath):
 
             if value is not None:
                 filedict[key].append(f'{fullfilepath}')
-                total_dublicat_files += 1
+                total_duplicat_files += 1
             else:
                 filedict.update({key: [f'{fullfilepath}']})
                 total_original_files += 1
-                total_dublicat_files += 1
+                total_duplicat_files += 1
 
 
 def prepare_files(base_dir1, base_dir2, dict_key):
@@ -263,7 +263,7 @@ def get_directory(index: int, args: list) -> object:
         :Authors: bodomus@gmail.com
         """
     for item in args:
-        x = re.search('^-sdir1=\S*$', item) if index == 1 else re.search('^-ddir2=\S*$', item)
+        x = re.search(f'^-sdir1=\S*$', item) if index == 1 else re.search('^-ddir2=\S*$', item)
         if x:
             return item.replace("-sdir1=" if index == 1 else "-sdir2=", '')
     return None
